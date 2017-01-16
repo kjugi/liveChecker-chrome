@@ -1,0 +1,97 @@
+﻿<!doctype html>
+<!--
+  Hasztasz PAPUT Multigaming international hacker group, profeszjonal amatur
+
+  JESTEŚMY LEGIONEM
+
+  credits to:
+    Filip 'kjugi' Kudła - filipkud31 @ gmail.com // github: kjugi
+    HASZTASZ GROUP - https://www.facebook.com/HASZTASZ/
+-->
+<html>
+  <head>
+    <title>Hasztasz PAPUT</title>
+    <style>
+      body {
+        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
+        font-size: 100%;
+      }
+      #status {
+        white-space: pre;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 400px;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="popup.css">
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <div class="menu">
+      <div class="menu__half">
+        <a href="http://twitch.tv/pago3" target="_blank"><img src="icons/icon_home.png"/><p class="menu__link">PAGO3</p></a>
+      </div>
+      <div class="menu__half">
+        <div class="menu__settings">
+          <figure id="settings">
+            <svg class="svg-gear" id="gear" height="30" viewBox="0 0 16 16" width="16">
+              <path d="M6.359 0h3.282l1.436 2.8h3.282L16 5.2 14.359 8 16 10.8l-1.641 2.4h-3.282L9.64 16H6.359l-1.436-2.8H1.641L0 10.8 1.641 8 0 5.2l1.641-2.4h3.282L6.36 0zM8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
+            </svg>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <div class="handler">
+      <h1 class="handler__title">Powiadamiacz PAGO</h1>
+      <div id="status"><img src="icons/loader.gif" class="handler__loader"/></div>
+    </div>
+
+    <div id="options" class="options none">
+      <h1 class="options__title text-xs-center">Ustawienia wtyczki</h1>
+
+      <div class="options__option">
+        <input type="checkbox" id="timeout" name="timeout" checked>
+        <label for="timeout" class="options__option__text">Okresowe sprawdzanie streama</label>
+      </div>
+
+      <div class="options__option">
+        <label for="range" class="options__option__text">Co ile minut ma sprawdzać stream?</label>
+        <input type="range" id="range" name="range" value="60" min="1" max="240"><div id="rangeValue">60 minut</div>
+      </div>
+
+      <div class="options__option">
+        <input type="checkbox" id="voiceAlert" name="voiceAlert" checked>
+        <label for="voiceAlert" class="options__option__text">Powiadomienie głosowe</label>
+      </div>
+
+      <div class="options__option">
+        <label for="volume" class="options__option__text">Poziom głośności</label>
+        <input type="range" id="volume" name="volume" value="50" min="1" max="100"><div id="volumeValue">50%</div>
+      </div>
+
+      <div class="options__option">
+        <button id="saveFunctions" class="options__option__button text-xs-center image-center">Zapisz opcje</button>
+      </div>
+    </div>
+
+    <div id="success" class="information hidden-popup">
+      <p class="information__text">Zapisano zmiany!</p>
+    </div>
+
+    <div id="error" class="information hidden-popup">
+      <p class="information__text">Coś poszło nie tak</p>
+    </div>
+
+    <div class="footer">
+      <div class="footer__social">
+        <p class="footer__social__text">Social media:</p>
+        <a href='https://www.facebook.com/DonPAGO/' target='_blank'><img src='icons/fb_logo.png'/></a>
+        <a href='https://www.twitch.tv/pago3/' target='_blank'><img src='icons/twitch_logo.png'/></a>
+        <a href='https://www.instagram.com/donpago/' target='_blank'><img src='icons/instagram_logo.png'/></a>
+        <a href='https://www.youtube.com/user/Pago33' target='_blank'><img src='icons/youtube_logo.png'/></a>
+      </div>
+    </div>
+  </body>
+</html>
+
