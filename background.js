@@ -6,8 +6,8 @@ Kappa
 #PAPUT
 */
 
-//variable to playing PAGO audio - łapki w góre
-var oneMoreTimeHomie = true, audio, volumeLevelDecimal;
+//variable to playing PAGO audio/showing nottications
+var oneMoreTimeHomie = true, audio, volumeLevelDecimal, showNotificationVal = null, videoId, videoTitle, canShowNotification = true;
 
 function getTwitchStreamStatus(streamOn, streamOff, errorCallback){
 	//one streamer extension PAGO3
@@ -29,7 +29,7 @@ function getTwitchStreamStatus(streamOn, streamOff, errorCallback){
   	xhr.onload = function() {
 	    var response = JSON.parse(xhr.responseText);
 
-	    if (!response) {
+	    if(!response){
 	      showInfo("error");
 	      errorCallback('No response from TWITCH API!');
 	      return;
@@ -56,7 +56,7 @@ function getTwitchStreamStatus(streamOn, streamOff, errorCallback){
 			streamOff(streamNull);
 		}
 	};
-	xhr.onerror = function() {
+	xhr.onerror = function(){
 		showInfo("error");
 	    errorCallback('Network error.');
 	};
@@ -65,22 +65,23 @@ function getTwitchStreamStatus(streamOn, streamOff, errorCallback){
 
 //checking on welcome if stream is live function - START
 function checkLiveStream(){
-	getTwitchStreamStatus(function(streamTitle, streamGame, streamLiveViewers, streamLiveDate, streamPreviewMedium) {
+	getTwitchStreamStatus(function(streamTitle, streamGame, streamLiveViewers, streamLiveDate, streamPreviewMedium){
 		chrome.browserAction.setIcon({path: "icons/icon_1.png"});
 		chrome.browserAction.setBadgeBackgroundColor({color:[208, 0, 24, 255]});
  		chrome.browserAction.setBadgeText({text:"ON"});
 
  		//start audio play - only when stream start
  		playMusic(volumeLevelDecimal);
+ 		showNotification(canShowNotification);
 	},
 	function(streamOff){
-		chrome.browserAction.setIcon({path: "icons/icon_default.png"});
+		chrome.browserAction.setIcon({path: "icons/dead_glitch.png"});
 		chrome.browserAction.setBadgeText({text: ''});
 
 		//to play again when stream went on
 		oneMoreTimeHomie = true;
 	},
-	function(errorMessage) {
+	function(errorMessage){
 		showInfo("error");
 	  	console.log('Cannot display information. ' + errorMessage);
 	});
@@ -100,7 +101,7 @@ function getOptions(){
 			var itemsArray = JSON.parse(items.options);
 			var miliseconds, interval, volumeLevelPercent;
 
-			if(itemsArray.length == 4){
+			if(itemsArray.length == 5){
 				if(itemsArray[0] === false && itemsArray[1] === false){
 					miliseconds = 0;
 					clearInterval(interval);
@@ -115,6 +116,13 @@ function getOptions(){
 					volumeLevelPercent = itemsArray[3];
 					volumeLevelDecimal = itemsArray[3] * 0.01;
 				}
+
+				if(itemsArray[4] != false){
+					canShowNotification = true;
+				}
+				else{
+					canShowNotification = false;
+				}
 			}
 			else{
 				clearInterval(interval);
@@ -122,6 +130,8 @@ function getOptions(){
 				interval = setInterval(checkLiveStream,miliseconds);
 
 				volumeLevelDecimal = 0.5;
+
+				canShowNotification = true;
 			}
 		}
 	});
@@ -136,7 +146,7 @@ chrome.storage.onChanged.addListener(function(){
 
 //setting first default options - ONLY ON FIRST RUN
 function setDefaultFirstOptions(){
-	var arrayValues = [true,'50'];
+	var arrayValues = [true,'60',true,'50',true];
 	var jsonArray = JSON.stringify(arrayValues);
 
 	chrome.storage.sync.set({
@@ -155,8 +165,130 @@ function playMusic(volumeLevel){
 			audio.play();
 		}
 	}
+}
 
-	//to stop playing till the stream will ends
+//functions to notifications when stream is LIVE
+//basic showingNotification
+function showNotification(show) {
+	if(oneMoreTimeHomie == true && show == true){
+	 	chrome.notifications.create('twitch', {
+	        type: 'basic',
+	        iconUrl: 'icons/icon_1.png',
+	        title: 'Stream właśnie jest live',
+			buttons: [{title:'Ogladaj'},{title:"Zamknij"}],
+	        message: 'Streamer włączył właśnie live stream\'a'
+	    }, function(id) {
+	    	showNotificationVal = id;
+	    });
+   	}
+
+   	//to stop playing/showing nottications till the stream will ends
 	oneMoreTimeHomie = false;
 }
 
+//what happened when user click on button - OPEN LINK WITH STREAM / CLOSE NOTIFICATION
+chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonId){
+    if (notificationId === showNotificationVal){
+        if(buttonId === 0 && notificationId == "twitch"){
+            window.open("http://twitch.tv/filipkud");
+        }
+        else if(buttonId === 0 && notificationId == "youtube"){
+        	window.open("https://www.youtube.com/watch?v="+videoId);
+        }
+        else if(buttonId === 1){
+            chrome.notifications.clear(notificationId,function(){ //..
+            });
+        }
+    }
+});
+
+//what happened when user click on nottification - OPEN LINK WITH STREAM
+chrome.notifications.onClicked.addListener(function(notificationId){
+	if (notificationId === showNotificationVal){
+        if(notificationId == "twitch"){
+			window.open("http://twitch.tv/filipkud");
+		}
+		else if(notificationId == "youtube"){
+        	window.open("https://www.youtube.com/watch?v="+videoId);
+        }
+	}
+});
+
+
+//getting last uploaded video on youtube - START
+
+function getYoutubeStorage(){
+	chrome.storage.sync.get([
+		"youtube"
+	],function(items){
+		if(typeof items.youtube == "undefined"){
+			setYoutubeOptions();
+			showYoutubeNotification(canShowNotification);
+		}
+		else{
+			var itemsArray = JSON.parse(items.youtube);
+			var interval2;
+
+			if(itemsArray[0] != videoId){
+				setYoutubeOptions();
+				clearInterval(interval2);
+				showYoutubeNotification(canShowNotification);
+				interval2 = setInterval(getLastYoutubeVideo,600000);
+			}
+		}
+	});
+}
+
+function setYoutubeOptions(){
+	var videoIdArray = [videoId];
+	var jsonArray = JSON.stringify(videoIdArray);
+
+	chrome.storage.sync.set({
+		"youtube":jsonArray
+	});
+
+	getYoutubeStorage();
+}
+
+function getLastYoutubeVideo(){
+	//step 1 of 3 - getting channel id
+	// have this by api call one time - id doesn't change
+	//getting channelID - https://www.googleapis.com/youtube/v3/search?part=snippet&q={USERNAME}&type=channel&key={KEY}
+	var channelId = "UCj0Y1xghVK0RPygzfysuQ6A";
+
+	//step 2 of 3 - getting video from channel
+	var data = null;
+
+	var xhr = new XMLHttpRequest();
+	xhr.withCredentials = true;
+
+	xhr.open("GET", "https://www.googleapis.com/youtube/v3/search?order=date&part=snippet&channelId="+channelId+"&key=AIzaSyA15VDfUfP5n9kflo544YvPRmt4ljsC-IY&maxResults=1&type=video");
+	xhr.send(data);
+
+	xhr.addEventListener("readystatechange", function () {
+		if(this.readyState === 4){
+			var jsonResponse1 = JSON.parse(this.responseText);
+			videoId = jsonResponse1.items[0].id.videoId;
+			videoTitle = jsonResponse1.items[0].snippet.title;
+
+			getYoutubeStorage();
+		}
+	});
+}
+
+function showYoutubeNotification(show) {
+	if(show == true){
+	 	chrome.notifications.create('youtube', {
+	        type: 'basic',
+	        iconUrl: 'icons/icon_1.png',
+	        title: 'Widziałeś nowy film na YouTube?',
+			buttons: [{title:'Ogladaj'},{title:"Zamknij"}],
+	        message: videoTitle
+	    },function(id){
+	    	showNotificationVal = id;
+	    });
+	}
+}
+
+getLastYoutubeVideo();
+//getting last uploaded video on youtube - END
