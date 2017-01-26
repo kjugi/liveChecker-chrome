@@ -118,12 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	function(streamOff){
 		var status = document.getElementById('status');
 
-		chrome.browserAction.setIcon({path: "icons/icon_default.png"});
+		chrome.browserAction.setIcon({path: "icons/dead_glitch.png"});
 		chrome.browserAction.setBadgeText({text: ''});
 
 		status.innerHTML = "<p class='handler__text text-xs-center'>"+streamOff+"</p><img src='icons/dead_glitch.png' class='image-center'/><p class='handler__text'>Sprawdź co na naszej grupie: <a href='https://www.facebook.com/groups/1721694058053294/' target='_blank'>Bynie Pągowskiego</a></p>";
 	},
-	function(errorMessage) {
+	function(errorMessage){
 		showInfo("error");
 		renderStatus('Cannot display information. ' + errorMessage);
 	});
@@ -196,12 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
 		arrayValues = [];
 		var timeoutCheckboxValue = document.getElementById("timeout").checked;
 		var voiceAlertCheckboxValue = document.getElementById("voiceAlert").checked;
+		var chromeAlertCheckboxValue = document.getElementById("chromeAlert").checked;
 
 			arrayValues.push(timeoutCheckboxValue);
 		pushToLocalStorage(timeoutCheckboxValue,"range");
 
 			arrayValues.push(voiceAlertCheckboxValue);
 		pushToLocalStorage(voiceAlertCheckboxValue,"volume");
+
+			arrayValues.push(chromeAlertCheckboxValue);
 
 		var jsonArray = JSON.stringify(arrayValues);
 
@@ -227,9 +230,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			var voiceAlert = document.getElementById("voiceAlert");
 			var volume = document.getElementById("volume");
 			var volumeValue = document.getElementById("volumeValue");
+			
+			var chromeAlert = document.getElementById("chromeAlert");
 			//DOM elements - END
 
-			if(itemsArray.length == 4){
+			if(itemsArray.length == 5){
 				if(itemsArray[0] === false && itemsArray[1] === false){
 					timeout.checked = itemsArray[0];
 					range.disabled = true;
@@ -253,6 +258,13 @@ document.addEventListener('DOMContentLoaded', function() {
 					volume.value = itemsArray[3];
 					volumeValue.innerHTML = itemsArray[3]+"%";
 				}
+
+				if(itemsArray[4] === false){
+					chromeAlert.checked = itemsArray[4];
+				}
+				else{
+					chromeAlert.checked = itemsArray[4];
+				}
 			}
 			else{
 				timeout.checked = true;
@@ -264,6 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
 				volume.disabled = false;
 				volume.value = 50;
 				volumeValue.innerHTML = "50%";
+
+				chromeAlert.checked = true;
 			}
 		});
 	}
@@ -347,14 +361,9 @@ document.addEventListener('DOMContentLoaded', function() {
 /****
 
 TO DO:
-1) nottifications in toolbar chrome - need permission/knowledge
+1) nottifications in toolbar chrome - TO TEST
 2) ADD option with live iframe instead of img from stream + options with autoplay and choose between img/iframe
-4) ADD bug report to my mail/ticket on github
-5) review all errors
-6) add youtube the newest movie and show it with link && title instead fb group (refreshing more times)
-.
-.
-.
-x) minute word rendering function - not really needed
+3) ADD bug report to ticket on github
+4) ADD youtube the newest movie and show it with link && title instead fb group (refreshing more times)
 
 ****/
